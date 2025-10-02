@@ -1,59 +1,137 @@
-# MongoDB Fundamentals - Week 1
+📚 PLP Bookstore MongoDB Project
 
-## Setup Instructions
+This project demonstrates MongoDB fundamentals — from setup, CRUD operations, advanced queries, aggregation pipelines, and indexing — using a sample bookstore database.
 
-Before you begin this assignment, please make sure you have the following installed:
+🚀 Setup Instructions
+1. Install Node.js
 
-1. **MongoDB Community Edition** - [Installation Guide](https://www.mongodb.com/docs/manual/administration/install-community/)
-2. **MongoDB Shell (mongosh)** - This is included with MongoDB Community Edition
-3. **Node.js** - [Download here](https://nodejs.org/)
+Download from https://nodejs.org
 
-### Node.js Package Setup
+During installation, check "Add to PATH"
 
-Once you have Node.js installed, run the following commands in your assignment directory:
+Verify installation:
 
-```bash
-# Initialize a package.json file
+node -v
+npm -v
+
+2. Install MongoDB
+
+Option A (Local): Install MongoDB Community Edition → https://www.mongodb.com/try/download/community
+
+Option B (Cloud): Create a free MongoDB Atlas cluster → https://www.mongodb.com/atlas
+
+3. Install MongoDB Driver
+
+Inside your project folder:
+
 npm init -y
-
-# Install the MongoDB Node.js driver
 npm install mongodb
-```
 
-## Assignment Overview
+4. Insert Sample Data
 
-This week focuses on MongoDB fundamentals including:
-- Creating and connecting to MongoDB databases
-- CRUD operations (Create, Read, Update, Delete)
-- MongoDB queries and filters
-- Aggregation pipelines
-- Indexing for performance
+Run the ready-made script:
 
-## Submission
+node insert_books.js
 
-Complete all the exercises in this assignment and push your code to GitHub using the provided GitHub Classroom link.
 
-## Getting Started
+This will create:
 
-1. Accept the GitHub Classroom assignment invitation
-2. Clone your personal repository that was created by GitHub Classroom
-3. Install MongoDB locally or set up a MongoDB Atlas account
-4. Run the provided `insert_books.js` script to populate your database
-5. Complete the tasks in the assignment document
+Database: plp_bookstore
 
-## Files Included
+Collection: books
 
-- `Week1-Assignment.md`: Detailed assignment instructions
-- `insert_books.js`: Script to populate your MongoDB database with sample book data
+Inserts 10 sample book documents
 
-## Requirements
+📝 CRUD Queries
+Find all books in a specific genre
+db.books.find({ genre: "Memoir" })
 
-- Node.js (v18 or higher)
-- MongoDB (local installation or Atlas account)
-- MongoDB Shell (mongosh) or MongoDB Compass
+Find books published after a certain year
+db.books.find({ published_year: { $gt: 2015 } })
 
-## Resources
+Find books by a specific author
+db.books.find({ author: "George Orwell" })
 
-- [MongoDB Documentation](https://docs.mongodb.com/)
-- [MongoDB University](https://university.mongodb.com/)
-- [MongoDB Node.js Driver](https://mongodb.github.io/node-mongodb-native/) 
+Update the price of a specific book
+db.books.updateOne(
+  { title: "The Great Gatsby" },
+  { $set: { price: 12.00 } }
+)
+
+Delete a book by its title
+db.books.deleteOne({ title: "1984" })
+
+🔎 Advanced Queries
+Books in stock & published after 2010
+db.books.find({
+  in_stock: true,
+  published_year: { $gt: 2010 }
+})
+
+Projection (only title, author, price)
+db.books.find({}, { title: 1, author: 1, price: 1, _id: 0 })
+
+Sorting by price
+
+Ascending:
+
+db.books.find().sort({ price: 1 })
+
+
+Descending:
+
+db.books.find().sort({ price: -1 })
+
+Pagination (5 per page)
+
+Page 1:
+
+db.books.find().limit(5)
+
+
+Page 2:
+
+db.books.find().skip(5).limit(5)
+
+📊 Aggregation Pipelines
+Average price of books by genre
+db.books.aggregate([
+  { $group: { _id: "$genre", avgPrice: { $avg: "$price" } } }
+])
+
+Author with the most books
+db.books.aggregate([
+  { $group: { _id: "$author", count: { $sum: 1 } } },
+  { $sort: { count: -1 } },
+  { $limit: 1 }
+])
+
+Group books by decade
+db.books.aggregate([
+  { $project: { decade: { $subtract: ["$published_year", { $mod: ["$published_year", 10] }] } } },
+  { $group: { _id: "$decade", count: { $sum: 1 } } },
+  { $sort: { _id: 1 } }
+])
+
+⚡ Indexing & Performance
+Index on title
+db.books.createIndex({ title: 1 })
+
+Compound index on author & published_year
+db.books.createIndex({ author: 1, published_year: -1 })
+
+Check query performance
+db.books.find({ title: "Dune" }).explain("executionStats")
+
+
+You should see fewer documents scanned after creating the index.
+
+✅ Expected Outcome
+
+Database: plp_bookstore
+
+Collection: books with 10 documents
+
+Working CRUD, advanced queries, aggregations, and indexing
+
+Improved performance with indexes
